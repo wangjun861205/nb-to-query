@@ -9,7 +9,7 @@ license = "MIT"
 
 [dependencies]
 chrono = "0.4.31"
-nb-to-query-derive = { path = "../nb-to-query-derive" }
+nb-to-query-derive = "0.1.1"
 
 [features]
 chrono = []

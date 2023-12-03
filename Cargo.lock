@@ -119,6 +119,8 @@ dependencies = [
 [[package]]
 name = "nb-to-query-derive"
 version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "913ef01bc515d3e00334f79a09fb0ebc1fa439a1712d4f52708ad41cca984141"
 dependencies = [
  "proc-macro2",
  "quote",
