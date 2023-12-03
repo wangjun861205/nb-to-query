@@ -1,5 +1,6 @@
 #![feature(iter_intersperse)]
 
+use chrono::{DateTime, NaiveDate, TimeZone};
 pub use nb_to_query_derive::ToQueryDerive;
 
 pub trait ToQuery {
@@ -125,9 +126,27 @@ where
     }
 }
 
+#[cfg(feature = "chrono")]
+impl<TZ> ToQuery for DateTime<TZ>
+where
+    TZ: TimeZone,
+{
+    fn to_query(&self, field_name: &str) -> Option<String> {
+        Some(format!("{}={}", field_name, self.to_rfc3339()))
+    }
+}
+
+#[cfg(feature = "chrono")]
+impl ToQuery for NaiveDate {
+    fn to_query(&self, field_name: &str) -> Option<String> {
+        Some(format!("{}={}", field_name, self.format("%Y-%m-%d")))
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+    use chrono::TimeZone;
 
     #[derive(ToQueryDerive)]
     struct TestStruct {
@@ -146,5 +165,26 @@ mod tests {
         };
         let query = test_struct.to_query("");
         assert_eq!(query, Some("a=a&b=true&c=1&d=a&d=b".into()));
+    }
+
+    #[cfg(feature = "chrono")]
+    #[derive(ToQueryDerive)]
+    struct TestStruct2<TZ>
+    where
+        TZ: TimeZone,
+    {
+        a: DateTime<TZ>,
+    }
+
+    #[cfg(feature = "chrono")]
+    #[test]
+    fn test_to_query2() {
+        use chrono::Utc;
+
+        let test_struct = TestStruct2::<Utc> {
+            a: Utc.with_ymd_and_hms(2023, 12, 3, 11, 45, 0).unwrap(),
+        };
+        let query = test_struct.to_query("");
+        assert_eq!(query, Some("a=2023-12-03T11:45:00+00:00".into()));
     }
 }
